@@ -112,5 +112,185 @@ class Moto(Veiculo):
     
     
 
+class Cliente:
+            
+    def __init__ (self, nome, cpf, nascimento):
+        self.__nome = nome
+        self.__cpf = cpf
+        self.__nascimento = nascimento
+        self.__historico = []
+
+
+
+
+    @property
+    def nome(self):
+        return self.__nome
+        
+    @nome.setter
+    def nome(self, novo_nome):
+        if novo_nome: # Validação simples
+            self.__nome = novo_nome
+        else:
+            print("ERRO: Nome não pode ser vazio.")
+
+    @property
+    def cpf(self):
+        return self.__cpf
+
+    @property
+    def nascimento(self):
+        return self.__nascimento
+
+    @property
+    def historico(self):
+        """Retorna uma CÓPIA da lista, para evitar modificação externa."""
+        return self.__historico.copy()
+    
+
+    def exibir_detalhes(self):
+        print("---Detalhes do Cliente---")
+        print(f"Nome: {self.nome}")
+        print(f" cpf: {self.cpf}")
+        print(f" Data de nascimento: {self.nascimento}")
+        print(f" Totalm de contratos: {len(self.historico)}")
+
+
+    def adicionar_contrato(self, contrato):
+        print(" ADICIONAR CONTRATO AO HISTÓRICO DE CONTRATOS")
+        self.__historico.append(contrato)
+        print(f"Novo contrato adicionado ao histórico do cliente {self.nome}.")
+
+class Contratos_aluguel: #Um contrato é um documento que liga um objeto cliente específico a um objeto veículo específico.
+    def __init__(self, cliente, veiculo, data_inicio, data_termino):
+        self.__cliente = cliente
+        self.__veiculo = veiculo
+        self.__data_inicio = data_inicio
+        self.__data_termino = data_termino
+        self.__data_termino_real = None #para saber qual é o dia exato do termino, comeca com (None)
+        self.__ativo = True # Variavel para saber se o contrato esta ativo, comeca ativo
+        self.__valor_total = self.calcular_valor_total(self.__data_termino)
+
+    @property
+    def cliente(self):
+        return self.__cliente
+
+    @property
+    def veiculo(self):
+        return self.__veiculo
+
+    @property
+    def ativo(self):
+        return self.__ativo
+        
+    @property
+    def valor_total(self):
+        return self.__valor_total
+
+
+
+    def calcular_valor_total (self, data_fim):
+
+        dias = (data_fim - self.__data_inicio).days
+        if dias <= 0:
+            dias = 1
+
+        return self.__veiculo.calcular_valor_aluguel(dias)
+    
+    def exibir_detalhes (self):
+        print("---Detalhes---")
+        print(f" Contrato (ativo: {self.ativo})")
+        print(f" Cliente: {self.cliente.nome} Cpf: {self.cliente.cpf}")
+        print(f" Veículo: {self.veiculo.modelo}, Placa: {self.veiculo.placa}")
+        print(f" O valor total previsto é de: {self.valor_total:.2f}")
+
+    def encerrar_contrtao (self, data_devolucao):
+        if self.__ativo:
+            self.__ativo = False
+            self.__data_termino_real = data_devolucao
+
+            self.__valor_total = self.calcular_valor_total(self.__data_termino_real)
+
+            self.__veiculo.devolver()
+            print(f" Contrato encerrado no valor total de R${self.valor_total:.2f}")
+
+        else:
+            print("ERRO, contrato ja foi encerrado!")
+
+
+
+
+
+
+class SistemaGerenciamento:
+    def __init__(self):
+        self.__veiculos = []
+        self.__clientes = []
+        self.__contratos = []
+        
+
+    def cadastrar_carro(self, placa, modelo, categoria, tarifa_diaria, portas):
+        novo_carro = Carro( placa, modelo, categoria, tarifa_diaria, portas)
+        self.__veiculos.append(novo_carro)
+        print(f'O veiculo do modelo: {modelo} e da placa: {placa} foi cadastrado com sucesso!')
+
+    def cadastrar_moto (self, placa, modelo, categoria, tarifa_diaria, cilindradas):
+        nova_moto = Moto(self, placa, modelo, categoria, tarifa_diaria, cilindradas)
+        self.__moto.append(nova_moto)
+        print(f'A moto de placa: {placa}, e modelo {modelo} foi cadastrada com sucesso!')
+
+
+    def buscar_veiculo_placa (self, placa):
+        print("---Busca por placa---")
+        for veiculo in self.__veiculos:
+            if veiculo.placa == placa:
+                return veiculo
+        return None
+    
+    def cadastrar_cliente(self, nome, cpf, nascimento):
+        novo_cliente = Cliente(nome, cpf, nascimento)
+        self.__clientes.append(novo_cliente)
+        print(f'Cliente de nome {nome} foi cadastrado com sucesso!')
+
+    def buscar_cliente_cpf (self, cpf):
+        print('---Busca por cliente---')
+        for cliente in self.__clientes:
+            if cliente.cpf == cpf:
+                return cliente
+        return None
+
+    def listar_veiculos_disponiveis(self):
+        encontrou_algum = False # variavel boolena
+        for veiculo in self.__veiculos:
+            if veiculo.status == 'disponivel':
+                veiculo.detalhes()
+                encontrou_algum = True
+        if not encontrou_algum:
+            print('Nenhum veículo dísponivel no momento! ')
+
+    def listar_clientes (self):
+        for cliente in self.__clientes:
+            cliente.exibir_detalhes()
+
+    def listar_contratos_ativos(self):
+        print('---contratos ativos')
+        encontrou_algum = False
+        for i, contrato in enumerate(self.__contratos):
+            if contrato.ativo:
+                print(f"ID do contrato {i}")
+                contrato.exibir_detalhes()
+                encontrou_algum = True
+        if not encontrou_algum:
+            print('NENHUM CONTRATO ATIVO')
+        return encontrou_algum
+
+    
+
+
+    
+    
+
 
             
+    
+
